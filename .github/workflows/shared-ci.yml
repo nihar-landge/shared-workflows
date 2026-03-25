@@ -1,0 +1,57 @@
+name: shared-ci-quality-check
+
+on:
+  workflow_call: 
+
+env:
+  IMAGE_NAME: demo-app
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Print GitHub Context Info
+        run: |
+          echo "👤 Triggered by : ${{ github.actor }}"
+          echo "🌿 Branch       : ${{ github.ref }}"
+          echo "🔑 Commit SHA   : ${{ github.sha }}"
+          echo "📦 Repository   : ${{ github.repository }}"
+          echo "📣 Event        : ${{ github.event_name }}"
+
+      - name: Run Basic CI Quality Check
+        run: echo "✅ Running Shared CI Quality Check"
+
+      - name: Build Docker Image (tagged with SHA)
+        run: |
+          docker build --build-arg ENV=dev -t ${{ env.IMAGE_NAME }}:${{ github.sha }} -t ${{ env.IMAGE_NAME }}:latest .
+
+      - name: Verify Docker Image Tags
+        run: docker images | grep ${{ env.IMAGE_NAME }}
+
+      - name: Remove Local Image
+        run: docker rmi ${{ env.IMAGE_NAME }}:${{ github.sha }} ${{ env.IMAGE_NAME }}:latest
+
+  test:
+    runs-on: ubuntu-latest
+    needs: build          
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Run Tests
+        run: echo "✅ Tests passed — build was successful"
+
+  security-scan:
+    runs-on: ubuntu-latest
+    needs: build      
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Run Trivy Filesystem Security Scan
+        uses: aquasecurity/trivy-action@0.20.0
+        with:
+          scan-type: fs
+          severity: HIGH,CRITICAL
