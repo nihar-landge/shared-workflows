@@ -35,6 +35,9 @@ jobs:
       - name: Remove Local Image
         run: docker rmi ${{ env.IMAGE_NAME }}:${{ github.sha }} ${{ env.IMAGE_NAME }}:latest
 
+      - name: Updated Step
+        run: echo "🚀 Shared workflow updated — all callers get this automatically!"
+
   test:
     runs-on: ubuntu-latest
     needs: build          
