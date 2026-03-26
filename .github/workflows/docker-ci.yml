@@ -30,3 +30,24 @@ jobs:
             -t ${{ secrets.DOCKER_USERNAME }}/${{ inputs.image_name }}:${{ inputs.tag }} \
             .
           docker push ${{ secrets.DOCKER_USERNAME }}/${{ inputs.image_name }}:${{ inputs.tag }}
+      
+      - name: Run Trivy Security Scan
+        uses: aquasecurity/trivy-action@0.20.0
+        with:
+          image-ref: ${{ secrets.DOCKER_USERNAME }}/${{ inputs.image_name }}:${{ inputs.tag }}
+          severity: HIGH,CRITICAL
+          exit-code: 1     
+
+      - name: Slack Notify Success
+        if: success()
+        run: |
+          curl -X POST ${{ secrets.SLACK_WEBHOOK }} \
+          -H 'Content-type: application/json' \
+          --data '{"text":"✅ Image *${{ inputs.image_name }}:${{ inputs.tag }}* built, pushed & scanned successfully!"}'
+
+      - name: Slack Notify Failure
+        if: failure()
+        run: |
+          curl -X POST ${{ secrets.SLACK_WEBHOOK }} \
+          -H 'Content-type: application/json' \
+          --data '{"text":"❌ Pipeline FAILED for *${{ inputs.image_name }}:${{ inputs.tag }}*. Check logs!"}'
