@@ -35,7 +35,7 @@ jobs:
 
       # ✅ Fixed
       - name: Run Trivy Security Scan
-        uses: aquasecurity/trivy-action@0.20.0
+        uses: aquasecurity/trivy-action@0.21.0
         continue-on-error: true # ← ADD THIS
         with:
           image-ref: ${{ secrets.DOCKER_USERNAME }}/${{ inputs.image_name }}:${{ inputs.tag }}
