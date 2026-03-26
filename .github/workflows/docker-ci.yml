@@ -43,13 +43,13 @@ jobs:
       - name: Slack Notify Success
         if: success()
         run: |
-          curl -X POST ${{ secrets.SLACK_WEBHOOK }} \
-          -H 'Content-type: application/json' \
-          --data '{"text":"✅ Image *${{ inputs.image_name }}:${{ inputs.tag }}* built, pushed & scanned successfully!"}'
+          curl -X POST "${{ secrets.SLACK_WEBHOOK }}" \
+            -H 'Content-type: application/json' \
+            --data "{\"text\":\"✅ Image *${{ inputs.image_name }}:${{ inputs.tag }}* built, pushed & scanned successfully!\"}"
 
       - name: Slack Notify Failure
         if: failure()
         run: |
-          curl -X POST ${{ secrets.SLACK_WEBHOOK }} \
-          -H 'Content-type: application/json' \
-          --data '{"text":"❌ Pipeline FAILED for *${{ inputs.image_name }}:${{ inputs.tag }}*. Check logs!"}'
+          curl -X POST "${{ secrets.SLACK_WEBHOOK }}" \
+            -H 'Content-type: application/json' \
+            --data "{\"text\":\"❌ Pipeline FAILED for *${{ inputs.image_name }}:${{ inputs.tag }}*. Check logs!\"}"
